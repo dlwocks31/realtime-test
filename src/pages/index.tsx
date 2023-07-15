@@ -56,13 +56,28 @@ export default function Home() {
         <button
           className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
           onClick={() => {
-            supabase
-              .channel("realtime:test")
-              .track({
-                user_name: this_user?.email ? this_user?.email : "Unknown",
-                last_active: new Date(),
+            const channel = supabase.channel("realtime:test");
+            channel
+              .on("presence", { event: "sync" }, () => {
+                const presentState = channel.presenceState();
+
+                console.log("inside presence: ", presentState);
+
+                setData({ ...presentState });
               })
-              .catch(console.error);
+              .subscribe((status) => {
+                if (status === "SUBSCRIBED") {
+                  channel
+                    .track({
+                      user_name: this_user?.email
+                        ? this_user?.email
+                        : "Unknown",
+                      last_active: new Date(),
+                    })
+                    .then((status) => console.log("status: ", status))
+                    .catch(console.error);
+                }
+              });
           }}
         >
           Button
