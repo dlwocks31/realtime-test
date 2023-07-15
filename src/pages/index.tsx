@@ -53,7 +53,18 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        <button className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
+        <button
+          className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
+          onClick={() => {
+            supabase
+              .channel("realtime:test")
+              .track({
+                user_name: this_user?.email ? this_user?.email : "Unknown",
+                last_active: new Date(),
+              })
+              .catch(console.error);
+          }}
+        >
           Button
         </button>
         <div>Current Text:</div>
