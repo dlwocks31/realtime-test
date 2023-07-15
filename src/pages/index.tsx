@@ -1,17 +1,24 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { RealtimePresenceState } from "@supabase/supabase-js";
+import { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js";
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import { Auth } from "@supabase/auth-ui-react";
+import {
+  // Import predefined theme
+  ThemeSupa,
+} from "@supabase/auth-ui-shared";
 
 export default function Home() {
   const supabase = useSupabaseClient();
   const this_user = useUser();
   const [data, setData] = useState<RealtimePresenceState>({});
+  const [channel, setChannel] = useState<RealtimeChannel>(() =>
+    supabase.channel("realtime:test")
+  );
 
   useEffect(() => {
+    if (!this_user) return;
     console.log("user: ", this_user);
-
-    const channel = supabase.channel("realtime:test");
 
     channel.on("presence", { event: "sync" }, () => {
       const presentState = channel.presenceState();
@@ -53,31 +60,21 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
+        {this_user ? (
+          "signed in"
+        ) : (
+          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
+        )}
         <button
           className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
           onClick={() => {
-            const channel = supabase.channel("realtime:test");
             channel
-              .on("presence", { event: "sync" }, () => {
-                const presentState = channel.presenceState();
-
-                console.log("inside presence: ", presentState);
-
-                setData({ ...presentState });
+              .track({
+                user_name: this_user?.email ? this_user?.email : "Unknown",
+                last_active: new Date(),
               })
-              .subscribe((status) => {
-                if (status === "SUBSCRIBED") {
-                  channel
-                    .track({
-                      user_name: this_user?.email
-                        ? this_user?.email
-                        : "Unknown",
-                      last_active: new Date(),
-                    })
-                    .then((status) => console.log("status: ", status))
-                    .catch(console.error);
-                }
-              });
+              .then((status) => console.log("status: ", status))
+              .catch(console.error);
           }}
         >
           Button
