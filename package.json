@@ -9,6 +9,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@blocknote/core": "^0.8.2",
+    "@blocknote/react": "^0.8.2",
     "@supabase/auth-helpers-nextjs": "^0.7.2",
     "@supabase/auth-helpers-react": "^0.4.0",
     "@supabase/auth-ui-react": "^0.4.2",
@@ -21,9 +23,13 @@
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
     "next": "^13.4.2",
+    "partykit": "^0.0.0-f26bb08",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "superjson": "1.12.2",
+    "y-partykit": "^0.0.0-f26bb08",
+    "y-webrtc": "^10.2.5",
+    "yjs": "^13.6.6",
     "zod": "^3.21.4"
   },
   "devDependencies": {

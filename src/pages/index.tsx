@@ -1,57 +1,17 @@
 import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
 import { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js";
 import Head from "next/head";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Auth } from "@supabase/auth-ui-react";
 import {
   // Import predefined theme
   ThemeSupa,
 } from "@supabase/auth-ui-shared";
 
+import dynamic from "next/dynamic";
+
+const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 export default function Home() {
-  const supabase = useSupabaseClient();
-  const this_user = useUser();
-  const [data, setData] = useState<RealtimePresenceState>({});
-  const [channel, setChannel] = useState<RealtimeChannel>(() =>
-    supabase.channel("realtime:test")
-  );
-
-  useEffect(() => {
-    if (!this_user) return;
-    console.log("user: ", this_user);
-
-    channel.on("presence", { event: "sync" }, () => {
-      const presentState = channel.presenceState();
-
-      console.log("inside presence: ", presentState);
-
-      setData({ ...presentState });
-    });
-
-    channel.on("presence", { event: "join" }, ({ newPresences }) => {
-      console.log("New users have joined: ", newPresences);
-    });
-
-    channel.on("presence", { event: "leave" }, ({ leftPresences }) => {
-      console.log("Users have left: ", leftPresences);
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    channel.subscribe(async (status) => {
-      if (status === "SUBSCRIBED") {
-        const status = await channel.track({
-          user_name: this_user?.email ? this_user?.email : "Unknown",
-          last_active: new Date(),
-        });
-
-        console.log("status: ", status);
-      }
-    });
-
-    return () => {
-      channel.unsubscribe().catch(console.error);
-    };
-  }, [this_user]);
   return (
     <>
       <Head>
@@ -60,27 +20,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        {this_user ? (
-          "signed in"
-        ) : (
-          <Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />
-        )}
-        <button
-          className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-          onClick={() => {
-            channel
-              .track({
-                user_name: this_user?.email ? this_user?.email : "Unknown",
-                last_active: new Date(),
-              })
-              .then((status) => console.log("status: ", status))
-              .catch(console.error);
-          }}
-        >
-          Button
-        </button>
-        <div>Current Text:</div>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
+        <div className="w-full border-2">
+          <Editor />
+        </div>
       </main>
     </>
   );
