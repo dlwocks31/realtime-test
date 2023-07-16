@@ -1,17 +1,45 @@
-import { useSupabaseClient, useUser } from "@supabase/auth-helpers-react";
-import { RealtimeChannel, RealtimePresenceState } from "@supabase/supabase-js";
 import Head from "next/head";
-import { useEffect, useMemo, useState } from "react";
-import { Auth } from "@supabase/auth-ui-react";
-import {
-  // Import predefined theme
-  ThemeSupa,
-} from "@supabase/auth-ui-shared";
-
 import dynamic from "next/dynamic";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useEffect, useState } from "react";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
+
+const emojis = ["👍", "🤔", "🌟"]; // Your emoji list
+
 export default function Home() {
+  const supabase = useSupabaseClient();
+  const [channel] = useState<RealtimeChannel>(() =>
+    supabase.channel("realtime:test")
+  );
+  const [selectedEmoji, setSelectedEmoji] = useState(""); // New state variable for the selected emoji
+
+  useEffect(() => {
+    channel
+      .on("broadcast", { event: "emoji" }, (payload) => {
+        if (payload.event === "emoji") {
+          console.log("broadcast", payload);
+          setSelectedEmoji(payload.payload.emoji); // update the selectedEmoji when an emoji event is received
+        }
+      })
+      .subscribe();
+  }, []);
+
+  const handleEmojiClick = (emoji: string) => {
+    channel
+      .send({
+        type: "broadcast",
+        event: "emoji",
+        payload: {
+          emoji,
+        },
+      })
+      .catch(console.error);
+    console.log(`You clicked on ${emoji}`);
+    setSelectedEmoji(emoji); // update the selectedEmoji when an emoji is clicked
+  };
+
   return (
     <>
       <Head>
@@ -20,8 +48,23 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className="flex min-h-screen flex-col items-center justify-center">
-        <div className="w-full border-2">
-          <Editor />
+        <div className="w-full">
+          <div className="flex justify-center">
+            {emojis.map((emoji, index) => (
+              <button
+                key={index}
+                onClick={() => handleEmojiClick(emoji)}
+                className="emoji-button mx-2 rounded-lg p-2 shadow-md"
+                style={{ fontSize: "1.5em" }}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+          <div className="border-2">
+            <Editor />
+          </div>
+          <div className="mt-4">Received emoji: {selectedEmoji}</div>{" "}
         </div>
       </main>
     </>

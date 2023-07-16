@@ -6,7 +6,7 @@ await import("./src/env.mjs");
 
 /** @type {import("next").NextConfig} */
 const config = {
-  reactStrictMode: true,
+  reactStrictMode: false, // FIXME: without this, channel subscription would run twice and not work
 
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config
