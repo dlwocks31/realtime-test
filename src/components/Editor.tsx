@@ -3,7 +3,6 @@ import { BlockNoteEditor } from "@blocknote/core";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 import * as Y from "yjs";
-import { WebrtcProvider } from "y-webrtc";
 import { useMemo } from "react";
 import YPartyKitProvider from "y-partykit/provider";
 
