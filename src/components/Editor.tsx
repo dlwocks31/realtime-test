@@ -77,7 +77,7 @@ const Editor = ({
           alert(`Emoji ${block.props.emoji} at block ${block.id} is clicked`)
         }
       >
-        <div className="absolute -left-16 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-500">
+        <div className="absolute -left-24 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gray-500">
           {block.props.emoji}
         </div>
         <InlineContent />
