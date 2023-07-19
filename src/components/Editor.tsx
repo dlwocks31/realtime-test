@@ -1,21 +1,21 @@
 "use client"; // this registers <Editor> as a Client Component
 import {
-  Block as BlockOriginal,
   BlockNoteEditor,
+  Block as BlockOriginal,
   BlockSchema,
-  defaultProps,
   defaultBlockSchema,
+  defaultProps,
 } from "@blocknote/core";
+import "@blocknote/core/style.css";
 import {
   BlockNoteView,
   InlineContent,
   createReactBlockSpec,
   useBlockNote,
 } from "@blocknote/react";
-import "@blocknote/core/style.css";
-import * as Y from "yjs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import YPartyKitProvider from "y-partykit/provider";
+import * as Y from "yjs";
 
 export type MyBlockSchema = BlockSchema & {
   emoji: {

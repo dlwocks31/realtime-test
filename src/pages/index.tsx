@@ -1,10 +1,9 @@
-import Head from "next/head";
-import dynamic from "next/dynamic";
-import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useEffect, useState } from "react";
-import { RealtimeChannel } from "@supabase/supabase-js";
 import { BlockNoteEditor, PartialBlock } from "@blocknote/core";
-import { concat } from "lodash";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { RealtimeChannel } from "@supabase/supabase-js";
+import dynamic from "next/dynamic";
+import Head from "next/head";
+import { useEffect, useState } from "react";
 import { P, match } from "ts-pattern";
 import { MyBlockSchema } from "../components/Editor";
 
