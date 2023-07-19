@@ -7,10 +7,18 @@ import { TextCursorPosition } from "@blocknote/core/types/src/extensions/Blocks/
 import { BlockNoteEditor, BlockSchema } from "@blocknote/core";
 import { text } from "stream/consumers";
 import { concat } from "lodash";
+import { z } from "zod";
+import { P, match } from "ts-pattern";
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 const emojis = ["👍", "🤔", "🌟"]; // Your emoji list
+
+const EmojiEventSchema = z.object({
+  payload: z.object({
+    emoji: z.string(),
+  }),
+});
 
 export default function Home() {
   const supabase = useSupabaseClient();
@@ -33,10 +41,20 @@ export default function Home() {
   useEffect(() => {
     channel
       .on("broadcast", { event: "emoji" }, (payload) => {
-        if (payload.event === "emoji") {
-          console.log("broadcast", payload);
-          setSelectedEmoji(payload.payload.emoji); // update the selectedEmoji when an emoji event is received
-        }
+        match(payload)
+          .with(
+            {
+              event: "emoji",
+              payload: {
+                emoji: P.string,
+              },
+            },
+            (payload) => {
+              console.log("broadcast", payload);
+              setSelectedEmoji(payload.payload.emoji);
+            }
+          )
+          .otherwise(() => console.log("otherwise"));
       })
       .subscribe();
   }, []);
