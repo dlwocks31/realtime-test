@@ -3,22 +3,13 @@ import dynamic from "next/dynamic";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { RealtimeChannel } from "@supabase/supabase-js";
-import { TextCursorPosition } from "@blocknote/core/types/src/extensions/Blocks/api/cursorPositionTypes";
-import { BlockNoteEditor, BlockSchema } from "@blocknote/core";
-import { text } from "stream/consumers";
+import { BlockNoteEditor } from "@blocknote/core";
 import { concat } from "lodash";
-import { z } from "zod";
 import { P, match } from "ts-pattern";
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
 const emojis = ["👍", "🤔", "🌟"]; // Your emoji list
-
-const EmojiEventSchema = z.object({
-  payload: z.object({
-    emoji: z.string(),
-  }),
-});
 
 export default function Home() {
   const supabase = useSupabaseClient();
