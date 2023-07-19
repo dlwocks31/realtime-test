@@ -95,7 +95,7 @@ export default function Home() {
               </button>
             ))}
           </div>
-          <div className="border-2">
+          <div className="p-12">
             <Editor
               selectedEmoji={selectedEmoji}
               onEditorReady={handleEditorReady}

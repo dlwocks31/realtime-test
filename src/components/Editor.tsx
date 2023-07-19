@@ -72,12 +72,15 @@ const Editor = ({
     containsInlineContent: false,
     render: ({ block }) => (
       <div
-        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500"
+        className="relative "
         onClick={() =>
           alert(`Emoji ${block.props.emoji} at block ${block.id} is clicked`)
         }
       >
-        {block.props.emoji}
+        <div className="absolute -left-16 inline-flex h-12 w-12 items-center justify-center rounded-full bg-gray-500">
+          {block.props.emoji}
+        </div>
+        <InlineContent />
       </div>
     ),
   });
@@ -139,7 +142,11 @@ const Editor = ({
   }, [editor, onEditorReady]);
 
   // Renders the editor instance using a React component.
-  return <BlockNoteView editor={editor} />;
+  return (
+    <div className="border-2">
+      <BlockNoteView editor={editor} />;
+    </div>
+  );
 };
 
 export default Editor;
