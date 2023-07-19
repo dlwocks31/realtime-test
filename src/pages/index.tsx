@@ -3,9 +3,10 @@ import dynamic from "next/dynamic";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { RealtimeChannel } from "@supabase/supabase-js";
-import { BlockNoteEditor } from "@blocknote/core";
+import { BlockNoteEditor, PartialBlock } from "@blocknote/core";
 import { concat } from "lodash";
 import { P, match } from "ts-pattern";
+import { MyBlockSchema } from "../components/Editor";
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
@@ -22,9 +23,11 @@ export default function Home() {
   );
   const [emojiBlockId, setEmojiBlockId] = useState<string | null>();
 
-  const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
+  const [editor, setEditor] = useState<BlockNoteEditor<MyBlockSchema> | null>(
+    null
+  );
 
-  const handleEditorReady = (editor: BlockNoteEditor | null) => {
+  const handleEditorReady = (editor: BlockNoteEditor<MyBlockSchema> | null) => {
     console.log("handleEditorReady");
     setEditor(editor);
   };
@@ -58,12 +61,15 @@ export default function Home() {
     if (textCursorBlockId) {
       const block = editor?.getBlock(textCursorBlockId);
       if (block) {
-        editor?.updateBlock(textCursorBlockId, {
-          content: concat(
-            { type: "text", text: emoji, styles: {} },
-            block.content
-          ),
-        });
+        const blocksToInsert: PartialBlock<MyBlockSchema>[] = [
+          {
+            type: "emoji",
+            props: {
+              emoji,
+            },
+          },
+        ];
+        editor?.insertBlocks(blocksToInsert, textCursorBlockId);
       }
     }
   };

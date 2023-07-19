@@ -3,14 +3,41 @@ import {
   Block as BlockOriginal,
   BlockNoteEditor,
   BlockSchema,
+  defaultProps,
+  defaultBlockSchema,
 } from "@blocknote/core";
-import { BlockNoteView, useBlockNote } from "@blocknote/react";
+import {
+  BlockNoteView,
+  InlineContent,
+  createReactBlockSpec,
+  useBlockNote,
+} from "@blocknote/react";
 import "@blocknote/core/style.css";
 import * as Y from "yjs";
 import { useEffect, useMemo, useState } from "react";
 import YPartyKitProvider from "y-partykit/provider";
 
-type Block = BlockOriginal<BlockSchema>;
+export type MyBlockSchema = BlockSchema & {
+  emoji: {
+    propSchema: {
+      emoji: {
+        default: "👍";
+      };
+      backgroundColor: {
+        default: "transparent";
+      };
+      textColor: {
+        default: "black";
+      };
+      textAlignment: {
+        default: "left";
+        values: readonly ["left", "center", "right", "justify"];
+      };
+    };
+  };
+};
+
+type Block = BlockOriginal<MyBlockSchema>;
 
 // Ref: https://github.com/TypeCellOS/BlockNote/blob/0ff6ed993eec400b3df720af95df26786770a3ea/packages/website/docs/.vitepress/theme/components/Examples/BlockNote/ReactBlockNote.tsx#L59
 // Our <Editor> component that we can now use
@@ -19,7 +46,7 @@ const Editor = ({
   setTextCursorBlockId,
 }: {
   selectedEmoji: string;
-  onEditorReady?: (editor: BlockNoteEditor | null) => void;
+  onEditorReady?: (editor: BlockNoteEditor<MyBlockSchema> | null) => void;
   setTextCursorBlockId: (blockId: string | null) => void;
 }) => {
   const [doc, provider] = useMemo(() => {
@@ -34,8 +61,30 @@ const Editor = ({
     return [doc, provider];
   }, []);
 
+  const EmojiBlock = createReactBlockSpec({
+    type: "emoji",
+    propSchema: {
+      ...defaultProps,
+      emoji: {
+        default: "👍" as const,
+      },
+    },
+    containsInlineContent: false,
+    render: ({ block }) => (
+      <div
+        className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-gray-500"
+        onClick={() =>
+          alert(`Emoji ${block.props.emoji} at block ${block.id} is clicked`)
+        }
+      >
+        {block.props.emoji}
+      </div>
+    ),
+  });
+  InlineContent;
+
   // Creates a new editor instance.
-  const editor: BlockNoteEditor | null = useBlockNote({
+  const editor: BlockNoteEditor<MyBlockSchema> | null = useBlockNote({
     collaboration: {
       provider,
       // Where to store BlockNote data in the Y.Doc:
@@ -46,7 +95,13 @@ const Editor = ({
         color: "#ff0000",
       },
     },
-    onTextCursorPositionChange: (editor: BlockNoteEditor) => {
+    blockSchema: {
+      // Adds all default blocks.
+      ...defaultBlockSchema,
+      // Adds the custom image block.
+      emoji: EmojiBlock,
+    },
+    onTextCursorPositionChange: (editor: BlockNoteEditor<MyBlockSchema>) => {
       const hoveredBlock: Block = editor.getTextCursorPosition().block;
       console.log("textCursorPosition", editor.getTextCursorPosition());
       setTextCursorBlockId(hoveredBlock.id);
