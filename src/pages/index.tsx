@@ -33,18 +33,10 @@ export default function Home() {
     channel
       .on("broadcast", { event: "emoji" }, (payload) => {
         match(payload)
-          .with(
-            {
-              event: "emoji",
-              payload: {
-                emoji: P.string,
-              },
-            },
-            (payload) => {
-              console.log("broadcast", payload);
-              setSelectedEmoji(payload.payload.emoji);
-            }
-          )
+          .with({ event: "emoji", payload: { emoji: P.string } }, (payload) => {
+            console.log("broadcast", payload);
+            setSelectedEmoji(payload.payload.emoji);
+          })
           .otherwise(() => console.log("otherwise"));
       })
       .subscribe();
