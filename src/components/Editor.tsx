@@ -144,7 +144,7 @@ const Editor = ({
   // Renders the editor instance using a React component.
   return (
     <div className="border-2">
-      <BlockNoteView editor={editor} />;
+      <BlockNoteView editor={editor} />
     </div>
   );
 };
