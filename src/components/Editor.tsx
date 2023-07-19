@@ -1,14 +1,27 @@
 "use client"; // this registers <Editor> as a Client Component
-import { BlockNoteEditor } from "@blocknote/core";
+import {
+  Block as BlockOriginal,
+  BlockNoteEditor,
+  BlockSchema,
+} from "@blocknote/core";
 import { BlockNoteView, useBlockNote } from "@blocknote/react";
 import "@blocknote/core/style.css";
 import * as Y from "yjs";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import YPartyKitProvider from "y-partykit/provider";
+
+type Block = BlockOriginal<BlockSchema>;
 
 // Ref: https://github.com/TypeCellOS/BlockNote/blob/0ff6ed993eec400b3df720af95df26786770a3ea/packages/website/docs/.vitepress/theme/components/Examples/BlockNote/ReactBlockNote.tsx#L59
 // Our <Editor> component that we can now use
-const Editor = () => {
+const Editor = ({
+  onEditorReady,
+  setTextCursorBlockId,
+}: {
+  selectedEmoji: string;
+  onEditorReady?: (editor: BlockNoteEditor | null) => void;
+  setTextCursorBlockId: (blockId: string | null) => void;
+}) => {
   const [doc, provider] = useMemo(() => {
     console.log("create");
     const doc = new Y.Doc();
@@ -20,6 +33,7 @@ const Editor = () => {
     );
     return [doc, provider];
   }, []);
+
   // Creates a new editor instance.
   const editor: BlockNoteEditor | null = useBlockNote({
     collaboration: {
@@ -32,7 +46,42 @@ const Editor = () => {
         color: "#ff0000",
       },
     },
+    onTextCursorPositionChange: (editor: BlockNoteEditor) => {
+      const hoveredBlock: Block = editor.getTextCursorPosition().block;
+      console.log("textCursorPosition", editor.getTextCursorPosition());
+      setTextCursorBlockId(hoveredBlock.id);
+      console.log("onTextCursorPositionChange", hoveredBlock);
+      editor.forEachBlock((block: Block) => {
+        if (
+          block.id === hoveredBlock.id &&
+          block.props.backgroundColor !== "blue"
+        ) {
+          // If the block is currently hovered by the text cursor, makes its
+          // background blue if it isn't already.
+          editor.updateBlock(block, {
+            props: { backgroundColor: "blue" },
+          });
+        } else if (
+          block.id !== hoveredBlock.id &&
+          block.props.backgroundColor === "blue"
+        ) {
+          // If the block is not currently hovered by the text cursor, resets
+          // its background if it's blue.
+          editor.updateBlock(block, {
+            props: { backgroundColor: "default" },
+          });
+        }
+
+        return true;
+      });
+    },
   });
+
+  useEffect(() => {
+    if (onEditorReady) {
+      onEditorReady(editor);
+    }
+  }, [editor, onEditorReady]);
 
   // Renders the editor instance using a React component.
   return <BlockNoteView editor={editor} />;

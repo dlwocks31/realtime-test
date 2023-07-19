@@ -3,6 +3,10 @@ import dynamic from "next/dynamic";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useEffect, useState } from "react";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import { TextCursorPosition } from "@blocknote/core/types/src/extensions/Blocks/api/cursorPositionTypes";
+import { BlockNoteEditor, BlockSchema } from "@blocknote/core";
+import { text } from "stream/consumers";
+import { concat } from "lodash";
 
 const Editor = dynamic(() => import("../components/Editor"), { ssr: false });
 
@@ -14,6 +18,17 @@ export default function Home() {
     supabase.channel("realtime:test")
   );
   const [selectedEmoji, setSelectedEmoji] = useState(""); // New state variable for the selected emoji
+  const [textCursorBlockId, setTextCursorBlockId] = useState<string | null>(
+    null
+  );
+  const [emojiBlockId, setEmojiBlockId] = useState<string | null>();
+
+  const [editor, setEditor] = useState<BlockNoteEditor | null>(null);
+
+  const handleEditorReady = (editor: BlockNoteEditor | null) => {
+    console.log("handleEditorReady");
+    setEditor(editor);
+  };
 
   useEffect(() => {
     channel
@@ -38,6 +53,18 @@ export default function Home() {
       .catch(console.error);
     console.log(`You clicked on ${emoji}`);
     setSelectedEmoji(emoji); // update the selectedEmoji when an emoji is clicked
+    setEmojiBlockId(textCursorBlockId);
+    if (textCursorBlockId) {
+      const block = editor?.getBlock(textCursorBlockId);
+      if (block) {
+        editor?.updateBlock(textCursorBlockId, {
+          content: concat(
+            { type: "text", text: emoji, styles: {} },
+            block.content
+          ),
+        });
+      }
+    }
   };
 
   return (
@@ -62,9 +89,15 @@ export default function Home() {
             ))}
           </div>
           <div className="border-2">
-            <Editor />
+            <Editor
+              selectedEmoji={selectedEmoji}
+              onEditorReady={handleEditorReady}
+              setTextCursorBlockId={setTextCursorBlockId}
+            />
           </div>
           <div className="mt-4">Received emoji: {selectedEmoji}</div>{" "}
+          <div>textCursorBlockId: {textCursorBlockId}</div>
+          <div>emojiBlockId: {emojiBlockId}</div>
         </div>
       </main>
     </>

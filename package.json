@@ -22,6 +22,7 @@
     "@trpc/next": "^10.26.0",
     "@trpc/react-query": "^10.26.0",
     "@trpc/server": "^10.26.0",
+    "lodash": "^4.17.21",
     "next": "^13.4.2",
     "partykit": "^0.0.0-f26bb08",
     "react": "18.2.0",
@@ -34,6 +35,7 @@
   },
   "devDependencies": {
     "@types/eslint": "^8.37.0",
+    "@types/lodash": "^4.14.195",
     "@types/node": "^18.16.0",
     "@types/prettier": "^2.7.2",
     "@types/react": "^18.2.6",
